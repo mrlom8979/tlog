@@ -23,7 +23,6 @@ void logger_init(logger* l, int lvl, const char* log_file, const char* name, con
     }
   }
 
-  // Попробуем открыть файл
   l->log_file = fopen(log_file, "a");
   if (!l->log_file) {
     fprintf(stderr, "Failed to open log file: %s\n", log_file);
@@ -31,8 +30,7 @@ void logger_init(logger* l, int lvl, const char* log_file, const char* name, con
   }
 
   l->log_level = lvl;
-  // l->log_time = log_time;
-  l->name = name ? strdup(name) : nullptr; // Сохраняем префикс
+  l->name = name ? strdup(name) : nullptr;
   l->pattern = pattern ? strdup(pattern) : strdup("H:M:S [N] <b> L </b>: l");
 }
 
@@ -44,47 +42,40 @@ void log_task(void* arg) {
     return;
   }
 
-  /*
-  const char* time_str = "";
-  if (data->log->log_time) {
-    time_str = get_current_time().c_str();
-  }
-  */
-  char* formatted_msg = nullptr;
+  formatter::formatted_msg messages = {nullptr, nullptr};
 
   if (data->level > TLOG_RAW) {
-    formatted_msg = formatter::format(
+    messages = formatter::format(
       data->log->pattern,
       data->log->name,
       data->level,
       data->message
     );
   } else {
-    formatted_msg = data->message;
+    messages = formatter::formatted_msg{data->message, data->message};
   }
-  // char log_message[2048];
-  // snprintf(log_message, sizeof(log_message), "[%s] %s%s\n",
-  // time_str,
-  // data->log->prefix ? data->log->prefix : "",
-  // data->message);
 
-  if (!formatted_msg) {
+  if (!messages.console_msg && !messages.file_msg) {
+    free(messages.console_msg);
+    free(messages.file_msg);
     free(data->message);
     free(data);
     return;
   }
 
-  // Записываем в файл
-  fprintf(data->log->log_file, "%s\n", formatted_msg);
+  fprintf(data->log->log_file, "%s\n", messages.file_msg);
   fflush(data->log->log_file);
 
-  if (data->level >= 2) { // Например, уровень 2 и выше выводим в stderr
-    fprintf(stderr, "%s\n", formatted_msg);
+  if (data->level >= 2) {
+    fprintf(stderr, "%s\n", messages.console_msg);
   } else {
-    fprintf(stdout, "%s\n", formatted_msg);
+    fprintf(stdout, "%s\n", messages.console_msg);
   }
 
-  if (data->level > TLOG_RAW) free(formatted_msg);
+  if (data->level > TLOG_RAW) {
+    free(messages.console_msg);
+    free(messages.file_msg);
+  }
   free(data->message);
   free(data);
 }
@@ -108,7 +99,6 @@ void log_msg(logger* l, int lvl, const char* format, ...) {
   task->level = lvl;
   task->message = strdup(buffer);
 
-  // Передаем `task` напрямую
   log_task(task);
 }
 

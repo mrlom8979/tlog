@@ -11,7 +11,6 @@
 #include <stdbool.h>
 
 #include <cstring>
-#include <string>
 
 #include <pthread.h>
 #include <time.h>

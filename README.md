@@ -176,3 +176,128 @@ These examples can be supplemented with images or screenshots to help users visu
 ## Conclusion
 
 This logger provides a convenient interface for logging in your application, supporting multiple logging levels and offering both colored terminal output and file logging. The logger works asynchronously, avoiding race conditions when logging to the terminal and writing to files.
+
+---
+
+# Documentation for Tags in the Logging System
+
+## Introduction
+
+The logging system supports special tags for formatting text in the console, adding timestamps, and including other contextual information. This documentation describes the available tags and their behavior.
+
+---
+
+## Formatting Tags
+
+### `<t>` and `</t>`
+- **Description:** Changes the text color in the console according to the log level.
+- **Usage Example:**
+  ```cpp
+  <t>Information</t>
+  ```
+- **Result:** The text "Information" will be displayed in the color associated with the log level.
+
+---
+
+### `<b>` and `</b>`
+- **Description:** Sets the background and text colors to highlight a block of text.
+- **Usage Example:**
+  ```cpp
+  <b>Important Message</b>
+  ```
+- **Result:** The text "Important Message" will be highlighted with a background color based on the log level.
+
+---
+
+### `<gb>`
+- **Description:** Sets the background color to light black and automatically adjusts the text color for contrast.
+- **Usage Example:**
+  ```cpp
+  <gb>System Message</gb>
+  ```
+- **Result:** The text "System Message" will appear on a light black background.
+
+---
+
+### `<r>`
+- **Description:** Resets all formatting settings (text and background colors).
+- **Usage Example:**
+  ```cpp
+  <r>Normal text</r>
+  ```
+- **Result:** The text will return to the default appearance.
+
+---
+
+## Timestamp Tags
+
+### `H`, `M`, `S`
+- **Description:** Inserts the current hour, minute, or second.
+- **Usage Example:**
+  ```cpp
+  H:M:S
+  ```
+- **Result:** The current time, e.g., `14:30:45`.
+
+### `Y`, `m`, `d`
+- **Description:** Inserts the current year, month, or day.
+- **Usage Example:**
+  ```cpp
+  Y-m-d
+  ```
+- **Result:** The current date, e.g., `2025-01-16`.
+
+---
+
+## Message Data Tags
+
+### `N`
+- **Description:** Inserts the name of the source (if provided).
+- **Usage Example:**
+  ```cpp
+  Source: N
+  ```
+- **Result:** The name of the message source.
+
+### `L`
+- **Description:** Inserts the string representation of the log level.
+- **Usage Example:**
+  ```cpp
+  Level: L
+  ```
+- **Result:** The log level, e.g., `INFO`.
+
+### `l`
+- **Description:** Inserts the message text.
+- **Usage Example:**
+  ```cpp
+  Message: l
+  ```
+- **Result:** The message content.
+
+---
+
+## Other Symbols
+
+### `\n`
+- **Description:** Inserts a newline.
+- **Usage Example:**
+  ```cpp
+  This is the first line\nThis is the second line
+  ```
+
+### `s`
+- **Description:** Adds the symbol `⋮` in the console and `|` in the file.
+- **Usage Example:**
+  ```cpp
+  Separator: s
+  ```
+
+---
+
+### Notes
+1. All tags must be properly closed to avoid display errors.
+2. Tags only affect console output. Messages written to files are recorded without formatting.
+
+---
+

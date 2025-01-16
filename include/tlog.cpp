@@ -21,7 +21,6 @@ void tlog_destroy() {
     queue::enqueue(&s_tlog->log_queue, stop_task);
     pthread_join(s_tlog->thread, NULL);
 
-    // free(s_tlog->thread);
     pthread_mutex_destroy(&s_tlog->log_queue.mutex);
     pthread_cond_destroy(&s_tlog->log_queue.not_empty);
     pthread_cond_destroy(&s_tlog->log_queue.not_full);
