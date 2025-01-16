@@ -148,12 +148,6 @@ Depending on the logger's configuration, messages will be displayed in the termi
 [2025-01-15 10:15:30] [APP] [INFO]: application running.
 ```
 
-Colors will be automatically applied based on the log level, such as:
-
-- **INFO** — Green
-- **ERROR** — Red
-- **WARNING** — Yellow
-
 ### Asynchronous Message Handling
 
 The logger uses a message queue, and all messages are processed in a separate thread. This prevents race conditions when outputting logs to the terminal and writing them to a file.
