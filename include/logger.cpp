@@ -9,7 +9,14 @@
 
 namespace tlog {
 
-void logger_init(logger* l, int lvl, const char* log_file, const char* name, const char* pattern) {
+void logger_init(logger* l,
+                 int lvl,
+                 const char* log_file,
+                 const char* name,
+                 const char* pattern,
+                 void (*pre_hook)(),
+                 void (*post_hook)()
+                 ) {
   std::filesystem::path file_path = log_file;
   std::filesystem::path log_dir = file_path.parent_path();
 
@@ -32,15 +39,42 @@ void logger_init(logger* l, int lvl, const char* log_file, const char* name, con
   l->log_level = lvl;
   l->name = name ? strdup(name) : nullptr;
   l->pattern = pattern ? strdup(pattern) : strdup("H:M:S [N] <b> L </b>: l");
+  l->pre_log_hook = pre_hook;
+  l->post_log_hook = post_hook;
 }
 
 void log_task(void* arg) {
+
   auto* data = reinterpret_cast<queue::log_data*>(arg);
-  if (!data || !data->log || !data->log->log_file || !data->message) {
-    fprintf(stderr, "Invalid log data provided.\n");
-    if (data) free(data);
+
+  if (!data) {
+    fprintf(stderr, "Invalid log data: data is null.\n");
     return;
   }
+
+  if (!data->log) {
+    fprintf(stderr, "Invalid log data: log is null.\n");
+    free(data);
+    return;
+  }
+
+  if (!data->log->log_file) {
+    fprintf(stderr, "Invalid log data: log_file is null.\n");
+    free(data);
+    return;
+  }
+
+  if (!data->message) {
+    fprintf(stderr, "Invalid log data: message is null.\n");
+    free(data);
+    return;
+  }
+  // auto* data = reinterpret_cast<queue::log_data*>(arg);
+  // if (!data || !data->log || !data->log->log_file || !data->message) {
+    // fprintf(stderr, "Invalid log data provided.\n");
+    // if (data) free(data);
+    // return;
+  // }
 
   formatter::formatted_msg messages = {nullptr, nullptr};
 
@@ -63,14 +97,20 @@ void log_task(void* arg) {
     return;
   }
 
-  fprintf(data->log->log_file, "%s\n", messages.file_msg);
-  fflush(data->log->log_file);
+  if (data->log->log_file) {
+    fprintf(data->log->log_file, "%s\n", messages.file_msg);
+    fflush(data->log->log_file);
+  }
+  
+  if (data->log->pre_log_hook) data->log->pre_log_hook();
 
   if (data->level >= 2) {
     fprintf(stderr, "%s\n", messages.console_msg);
   } else {
     fprintf(stdout, "%s\n", messages.console_msg);
   }
+
+  if (data->log->post_log_hook) data->log->post_log_hook();
 
   if (data->level > TLOG_RAW) {
     free(messages.console_msg);
